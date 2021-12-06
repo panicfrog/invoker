@@ -1,4 +1,4 @@
-use crate::{Color, Content, NodeType, NodeType::RenderNode};
+use crate::{Color, Content, NodeType, NodeType::RenderNode, Attribute};
 use std::cell::Cell;
 use std::default;
 use std::rc::{Rc, Weak};
@@ -79,5 +79,9 @@ impl Content for View {
 
     fn set_parent(&self, parent: &Rc<dyn Content>) {
         self.parent.set(Some(Rc::downgrade(parent)));
+    }
+
+    fn attribute(&self) -> Attribute {
+        Attribute::default()
     }
 }

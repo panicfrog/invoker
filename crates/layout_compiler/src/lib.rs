@@ -187,12 +187,82 @@ impl RootView {
     }
 }
 
+pub struct Corner {
+    pub top: Option<f32>,
+    pub bottom: Option<f32>,
+    pub leading: Option<f32>,
+    pub trailing: Option<f32>,
+}
+
+impl default::Default for Corner {
+    fn default() -> Self {
+        Corner{top: None, bottom: None, leading: None, trailing: None}
+    }
+}
+
+pub struct Border {
+    pub color: Color,
+    pub width: f32
+}
+
+impl default::Default for Border {
+    fn default() -> Self {
+        Border {color: Color::Black, width: 1.0}
+    }
+}
+
+pub enum Attr {
+    Corner(Corner),
+    Border(Border),
+    BackgroundColor(Option<Color>)
+}
+
+pub struct Attribute {
+    pub background_color: Option<Color>,
+    pub corner: Option<Corner>,
+    pub border: Option<Border>,
+}
+
+impl Attribute {
+    fn is_default(&self) -> bool {
+        self.background_color.is_none() &&
+            self.border.is_none() &&
+            self.corner.is_none()
+    }
+}
+
+impl default::Default for Attribute {
+   fn default() -> Self {
+       Attribute{background_color: None, corner: None, border: None}
+   }
+}
+
 pub trait Content {
     fn content_type(&self) -> NodeType;
     fn layout_node(&self, s: &mut Stretch) -> Result<Node, Error>;
     fn children(&self) -> Vec<Rc<dyn Content>>;
     fn parent(&self) -> Option<Weak<dyn Content>>;
     fn set_parent(&self, parent: &Rc<dyn Content>);
+    fn attribute(&self) -> Attribute { Attribute::default() }
+    fn set_attribute(&mut self, attr: Attr){}
+    // fn background_color(&mut self, color: Color) -> Self {
+    //     if let NodeType::RenderNode {n, .. } = self.content_type() {
+    //         self.set_attribute(Attr::BackgroundColor(Some(color)));
+    //     }
+    //     self
+    // }
+    // fn border(&mut self, border: Border) -> self {
+    //     if let NodeType::RenderNode {n, .. } = self.content_type() {
+    //         self.set_attribute(Attr::Border(border));
+    //     }
+    //     self
+    // }
+    // fn corner(&mut self, corner: Corner) -> self {
+    //     if let NodeType::RenderNode {n, .. } = self.content_type() {
+    //         self.set_attribute(Attr::Corner(corner));
+    //     }
+    //     self
+    // }
 
     fn default_frame(self) -> FrameWrapper
     where
@@ -200,6 +270,7 @@ pub trait Content {
     {
         FrameWrapper::new(Rc::new(self))
     }
+
     fn frame(self, width: Option<f32>, height: Option<f32>) -> FrameWrapper
     where
         Self: Sized + 'static,
